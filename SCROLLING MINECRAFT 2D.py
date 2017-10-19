@@ -6,7 +6,6 @@ import random
 import pickle
 
 colors = Colors()
-BARRIER = -1
 BEDROCK = 0
 DIRT = 1
 GRASS = 2
@@ -36,7 +35,6 @@ renderables = [DIRT, GRASS, WATER, COAL, ROCK, WOOD]
 colors.new_color(75, 75, 75)
 colors.new_color(225, 175, 135)
 colormap = {
-    BARRIER: 0,
     BEDROCK: colors.custom[0],
     DIRT: colors.brown,
     GRASS: colors.green,
@@ -103,9 +101,8 @@ craft = {
     EMERALD: {DIAMOND: 2, GRASS: 4},
     AMETHYST: {DIAMOND: 1, GRASS: 2}
 }
-barrier_colors = (colors.red, colors.blue, colors.yellow, colors.green, colors.purple)
+barrier_colors = (colors.light_blue, colors.blue, colors.dark_blue, colors.black)
 barrier_color = 0
-colormap[BARRIER] = barrier_colors[barrier_color]
 selection = 0
 field = [[random.choice(renderables) for i in range(settings.mapwidth)] for j in range(settings.mapheight)]
 entity_field = [[0 for i in range(settings.mapwidth)] for j in range(settings.mapheight)]
@@ -114,27 +111,29 @@ for r in range(settings.mapheight):
     for c in range(settings.mapwidth):
         if random.randint(1, 100) > 90:
             field[r][c] = DIAMOND
-coeff_x = 0
-coeff_y = 0
+coeff_x = -4
+coeff_y = -2
 
 
 def render_entities():
     for r in range(coeff_y, coeff_y + settings.maxfity + 1):
         for c in range(coeff_x, coeff_x + settings.maxfitx + 1):
-            if entity_field[r][c] > 0:
-                pg.draw.rect(screen, colormap[entity_field[r][c]],
-                             [settings.tilesize * c + settings.playersize // 2,
-                              settings.tilesize * r + settings.playersize // 2,
-                              settings.tilesize - settings.playersize,
-                              settings.tilesize - settings.playersize])
+            if 0 <= r < settings.mapheight and 0 <= c < settings.mapwidth:
+                if entity_field[r][c] > 0:
+                    pg.draw.rect(screen, colormap[entity_field[r][c]],
+                                 [settings.tilesize * (c - coeff_x) + settings.playersize // 2,
+                                  settings.tilesize * (r - coeff_y) + settings.playersize // 2,
+                                  settings.tilesize - settings.playersize,
+                                  settings.tilesize - settings.playersize])
     for r in range(coeff_y, coeff_y + settings.maxfity + 1):
         for c in range(coeff_x, coeff_x + settings.maxfitx + 1):
-            if small_entity_field[r][c] > 0:
-                pg.draw.rect(screen, colormap[small_entity_field[r][c]],
-                             [settings.tilesize * c + (settings.playersize // 3 * 2) * 1.5,
-                              settings.tilesize * r + (settings.playersize // 3 * 2) * 1.5,
-                              settings.tilesize - (settings.playersize // 3 * 2) * 3,
-                              settings.tilesize - (settings.playersize // 3 * 2) * 3])
+            if 0 <= r < settings.mapheight and 0 <= c < settings.mapwidth:
+                if small_entity_field[r][c] > 0:
+                    pg.draw.rect(screen, colormap[small_entity_field[r][c]],
+                                 [settings.tilesize * (c - coeff_x) + (settings.playersize // 3 * 2) * 1.5,
+                                  settings.tilesize * (r - coeff_y) + (settings.playersize // 3 * 2) * 1.5,
+                                  settings.tilesize - (settings.playersize // 3 * 2) * 3,
+                                  settings.tilesize - (settings.playersize // 3 * 2) * 3])
 
 
 def render_clouds():
@@ -150,57 +149,63 @@ def render_field():
     screen.fill(colors.gray)
     for r in range(coeff_y, coeff_y + settings.maxfity + 1):
         for c in range(coeff_x, coeff_x + settings.maxfitx + 1):
-            pg.draw.rect(screen, colormap[field[r][c]],
-                         [settings.tilesize * (c - coeff_x), settings.tilesize * (r - coeff_y), settings.tilesize,
-                          settings.tilesize])
+            if r < 0 or c < 0:
+                pg.draw.rect(screen, barrier_color,
+                             [settings.tilesize * (c - coeff_x), settings.tilesize * (r - coeff_y),
+                              settings.tilesize, settings.tilesize])
+            elif r > settings.mapheight - 1 or c > settings.mapwidth - 1:
+                pg.draw.rect(screen, barrier_color,
+                             [settings.tilesize * (c - coeff_x), settings.tilesize * (r - coeff_y),
+                              settings.tilesize, settings.tilesize])
+            else:
+                pg.draw.rect(screen, colormap[field[r][c]],
+                             [settings.tilesize * (c - coeff_x), settings.tilesize * (r - coeff_y),
+                              settings.tilesize, settings.tilesize])
     render_entities()
     render_player()
 
 
 def render_inventory():
-    x_pos = 10
-    if selection > 0:
-        for i in inventory[selection - 1: selection + 2]:
-            pg.draw.rect(screen, colormap[i], [x_pos, settings.maxfity * settings.tilesize + settings.tilesize // 2,
-                                               settings.tilesize, settings.tilesize])
-            if mode == 's':
-                text = font.render(str(inventory[i]), False, colors.black, colors.white)
-                screen.blit(text, [x_pos, settings.maxfity * settings.tilesize + settings.tilesize // 3])
-            x_pos += settings.tilesize + settings.tilesize // 3
-    else:
-        for i in inventory[selection + 2]:
-            pg.draw.rect(screen, colormap[i], [x_pos, settings.maxfity * settings.tilesize + settings.tilesize // 2,
-                                               settings.tilesize, settings.tilesize])
-            if mode == 's':
-                text = font.render(str(inventory[i]), False, colors.black, colors.white)
-                screen.blit(text, [x_pos, settings.maxfity * settings.tilesize + settings.tilesize // 3])
-            x_pos += settings.tilesize + settings.tilesize // 3
-    x_pos = 10
-    for i in range(selection):
-        x_pos += settings.tilesize + settings.tilesize // 3
-    pg.draw.rect(screen, colors.yellow,
-                 [x_pos + settings.tilesize // 3, settings.mapheight * settings.tilesize + settings.tilesize // 3,
-                  settings.tilesize // 3, settings.tilesize // 3])
-    # render_clouds()
+    x_pos = 70 + settings.tilesize
+    pg.draw.polygon(screen, colors.yellow,
+                    [(x_pos + settings.tilesize // 3, settings.maxfity * settings.tilesize + settings.tilesize),
+                     (x_pos + (settings.tilesize // 3) * 2,
+                     settings.maxfity * settings.tilesize + settings.tilesize), (x_pos + settings.tilesize // 2, settings.maxfity * settings.tilesize + settings.tilesize*1.5)])
+    x_pos = 0
+    for i in range(selection - 1, selection + 2):
+        x_pos += 50
+        if i == len(resources):
+            pg.draw.rect(screen, colormap[resources[0]],
+                         [x_pos, settings.maxfity * settings.tilesize + settings.tilesize + settings.tilesize // 2,
+                          settings.tilesize, settings.tilesize])
+        else:
+            pg.draw.rect(screen, colormap[resources[i]],
+                         [x_pos, settings.maxfity * settings.tilesize + settings.tilesize + settings.tilesize // 2,
+                          settings.tilesize, settings.tilesize])
+        if mode == 's':
+            text = font.render(str(inventory[resources[i]]), False, colors.black, colors.white)
+            screen.blit(text,
+                        [x_pos, settings.maxfity * settings.tilesize + settings.tilesize + settings.tilesize // 3])
+            # render_clouds()
 
 
 def render_player():
     pg.draw.rect(screen, colors.custom[1],
                  [settings.tilesize * 4 + settings.playersize, settings.tilesize * 2 + settings.playersize,
                   settings.tilesize - settings.playersize * 2, settings.tilesize - settings.playersize * 2])
-    # render_inventory()
+    render_inventory()
 
 
 def save_world():
-    save_file = open('/home/andrew/world1.txt', 'wb')
+    save_file = open('world1.txt', 'wb')
     pickle.dump(field, save_file)
-    save_file = open('/home/andrew/entities1.txt', 'wb')
+    save_file = open('entities1.txt', 'wb')
     pickle.dump(entity_field, save_file)
-    save_file = open('/home/andrew/smallentities1.txt', 'wb')
+    save_file = open('smallentities1.txt', 'wb')
     pickle.dump(small_entity_field, save_file)
     save_file.close()
     if mode == 's':
-        save_file = open('/home/andrew/inventory.txt', 'wb')
+        save_file = open('inventory.txt', 'wb')
         pickle.dump(inventory, save_file)
         save_file.close()
 
@@ -236,7 +241,7 @@ while not done:
                 done = True
     pg.display.flip()
 screen = pg.display.set_mode(
-    [settings.maxfitx * settings.tilesize, settings.maxfity * settings.tilesize + settings.tilesize * 2])
+    [settings.maxfitx * settings.tilesize, settings.maxfity * settings.tilesize + settings.tilesize * 3])
 while True:
     for event in pg.event.get():
         if event.type == pg.QUIT:
@@ -245,45 +250,45 @@ while True:
 
             # movement
             if event.key == pg.K_UP:
-                if not coeff_y == 0:
+                if not coeff_y == -2:
                     coeff_y -= 1
             elif event.key == pg.K_DOWN:
-                if not coeff_y == settings.mapheight - 1:
+                if not coeff_y == settings.mapheight - 3:
                     coeff_y += 1
             elif event.key == pg.K_LEFT:
-                if not coeff_x == 0:
+                if not coeff_x == -4:
                     coeff_x -= 1
             elif event.key == pg.K_RIGHT:
-                if not coeff_x == settings.mapwidth - 1:
+                if not coeff_x == settings.mapwidth - 5:
                     coeff_x += 1
 
             # interaction with blocks
             elif event.key == pg.K_SPACE:
-                current_block = field[coeff_y][coeff_x]
-                current_entity = entity_field[coeff_y][coeff_x]
-                current_small_entity = small_entity_field[coeff_y][coeff_x]
+                current_block = field[coeff_y + 2][coeff_x + 4]
+                current_entity = entity_field[coeff_y + 2][coeff_x + 4]
+                current_small_entity = small_entity_field[coeff_y + 2][coeff_x + 4]
                 if current_small_entity > 0:
                     if mode == 's':
                         inventory[current_entity] += 1
-                    small_entity_field[coeff_y][coeff_x] = 0
+                    small_entity_field[coeff_y + 2][coeff_x + 4] = 0
                 elif current_entity > 0:
                     if mode == 's':
                         inventory[current_entity] += 1
-                    entity_field[coeff_y][coeff_x] = 0
+                    entity_field[coeff_y + 2][coeff_x + 4] = 0
                 elif not current_block == BEDROCK:
                     if mode == 's':
                         inventory[current_block] += 1
-                    field[coeff_y][coeff_x] = BEDROCK
+                    field[coeff_y + 2][coeff_x + 4] = BEDROCK
             elif event.key == pg.K_1:
-                current_block = field[coeff_y][coeff_x]
+                current_block = field[coeff_y + 2][coeff_x + 4]
                 if mode == 's':
                     if inventory[resources[selection]] > 0:
                         if not current_block == BEDROCK:
                             inventory[current_block] += 1
-                        field[coeff_y][coeff_x] = resources[selection]
+                        field[coeff_y + 2][coeff_x + 4] = resources[selection]
                         inventory[resources[selection]] -= 1
                 else:
-                    field[coeff_y][coeff_x] = resources[selection]
+                    field[coeff_y + 2][coeff_x + 4] = resources[selection]
 
             # crafting
             elif event.key == pg.K_2 and mode == 's':
@@ -299,25 +304,25 @@ while True:
                     inventory[selection + 1] += 1
             # entities placement
             elif event.key == pg.K_3:
-                current_entity = entity_field[coeff_y][coeff_x]
+                current_entity = entity_field[coeff_y + 2][coeff_x + 4]
                 if mode == 's':
                     if inventory[resources[selection]] > 0:
                         if current_entity > 0:
                             inventory[current_entity] += 1
-                        entity_field[coeff_y][coeff_x] = resources[selection]
+                        entity_field[coeff_y + 2][coeff_x + 4] = resources[selection]
                         inventory[resources[selection]] -= 1
                 else:
-                    entity_field[coeff_y][coeff_x] = resources[selection]
+                    entity_field[coeff_y + 2][coeff_x + 4] = resources[selection]
             elif event.key == pg.K_4:
-                current_entity = small_entity_field[coeff_y][coeff_x]
+                current_entity = small_entity_field[coeff_y + 2][coeff_x + 4]
                 if mode == 's':
                     if inventory[resources[selection]] > 0:
                         if current_entity > 0:
                             inventory[current_entity] += 1
-                        small_entity_field[coeff_y][coeff_x] = resources[selection]
+                        small_entity_field[coeff_y + 2][coeff_x + 4] = resources[selection]
                         inventory[resources[selection]] -= 1
                 else:
-                    small_entity_field[coeff_y][coeff_x] = resources[selection]
+                    small_entity_field[coeff_y + 2][coeff_x + 4] = resources[selection]
 
             # selection movement
             elif event.key == pg.K_LEFTBRACKET:
@@ -333,15 +338,15 @@ while True:
             elif event.key == pg.K_s:
                 save_world()
             elif event.key == pg.K_l:
-                load_file = open('/home/andrew/world1.txt', 'rb')
+                load_file = open('world1.txt', 'rb')
                 field = pickle.load(load_file)
-                load_file = open('/home/andrew/entities1.txt', 'rb')
+                load_file = open('entities1.txt', 'rb')
                 entity_field = pickle.load(load_file)
-                load_file = open('/home/andrew/smallentities1.txt', 'rb')
+                load_file = open('smallentities1.txt', 'rb')
                 small_entity_field = pickle.load(load_file)
                 load_file.close()
                 if mode == 's':
-                    save_file = open('/home/andrew/inventory.txt', 'rb')
+                    save_file = open('inventory.txt', 'rb')
                     inventory = pickle.load(save_file)
                     save_file.close()
 
@@ -360,7 +365,4 @@ while True:
     render_field()
     pg.display.flip()
     clock.tick(20)
-    barrier_color += 1
-    if barrier_color == len(barrier_colors):
-        barrier_color = 0
-    colormap[BARRIER] = barrier_colors[barrier_color]
+    barrier_color = random.choice(barrier_colors)

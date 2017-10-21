@@ -170,7 +170,8 @@ def render_inventory():
     pg.draw.polygon(screen, colors.yellow,
                     [(x_pos + settings.tilesize // 3, settings.maxfity * settings.tilesize + settings.tilesize),
                      (x_pos + (settings.tilesize // 3) * 2,
-                     settings.maxfity * settings.tilesize + settings.tilesize), (x_pos + settings.tilesize // 2, settings.maxfity * settings.tilesize + settings.tilesize*1.5)])
+                      settings.maxfity * settings.tilesize + settings.tilesize),
+                     (x_pos + settings.tilesize // 2, settings.maxfity * settings.tilesize + settings.tilesize * 1.5)])
     x_pos = 0
     for i in range(selection - 1, selection + 2):
         x_pos += 50

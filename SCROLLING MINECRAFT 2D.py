@@ -128,9 +128,9 @@ def render_entities():
     for r in range(coeff_y, coeff_y + settings.maxfity + 1):
         for c in range(coeff_x, coeff_x + settings.maxfitx + 1):
             pass
-        if 0 <= r < settings.mapheight and 0 <= c < settings.mapwidth:
-            if small_entity_field[r][c] > 0:
-                pg.draw.rect(screen, colormap[small_entity_field[r][c]],
+            if 0 <= r < settings.mapheight and 0 <= c < settings.mapwidth:
+                if small_entity_field[r][c] > 0:
+                    pg.draw.rect(screen, colormap[small_entity_field[r][c]],
                              [settings.tilesize * (c - coeff_x) + (settings.playersize // 3 * 2) * 1.5,
                               settings.tilesize * (r - coeff_y) + (settings.playersize // 3 * 2) * 1.5,
                               settings.tilesize - (settings.playersize // 3 * 2) * 3,

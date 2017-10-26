@@ -131,10 +131,10 @@ def render_entities():
             if 0 <= r < settings.mapheight and 0 <= c < settings.mapwidth:
                 if small_entity_field[r][c] > 0:
                     pg.draw.rect(screen, colormap[small_entity_field[r][c]],
-                             [settings.tilesize * (c - coeff_x) + (settings.playersize // 3 * 2) * 1.5,
-                              settings.tilesize * (r - coeff_y) + (settings.playersize // 3 * 2) * 1.5,
-                              settings.tilesize - (settings.playersize // 3 * 2) * 3,
-                              settings.tilesize - (settings.playersize // 3 * 2) * 3])
+                                 [settings.tilesize * (c - coeff_x) + (settings.playersize // 3 * 2) * 1.5,
+                                  settings.tilesize * (r - coeff_y) + (settings.playersize // 3 * 2) * 1.5,
+                                  settings.tilesize - (settings.playersize // 3 * 2) * 3,
+                                  settings.tilesize - (settings.playersize // 3 * 2) * 3])
 
 
 def render_clouds():
@@ -142,7 +142,8 @@ def render_clouds():
         if cloudx[i] > settings.mapwidth * settings.tilesize + settings.cloudwidth:
             cloudx[i] = settings.cloudwidth * -1
             cloudy[i] = random.randint(0, settings.mapheight * settings.tilesize)
-        pg.draw.rect(screen, colors.white, [cloudx[i]+coeff_x, cloudy[i]+coeff_y, settings.cloudwidth, settings.cloudheight], 10)
+        pg.draw.rect(screen, colors.white,
+                         [cloudx[i]-coeff_x*settings.tilesize, cloudy[i]-coeff_y*settings.tilesize, settings.cloudwidth, settings.cloudheight], 10)
         cloudx[i] += i + 1
 
 
@@ -188,7 +189,7 @@ def render_inventory():
             text = font.render(str(inventory[resources[i]]), False, colors.black, colors.white)
             screen.blit(text,
                         [x_pos, settings.maxfity * settings.tilesize + settings.tilesize + settings.tilesize // 3])
-            render_clouds()
+    render_clouds()
 
 
 def render_player():

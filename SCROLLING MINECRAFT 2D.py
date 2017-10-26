@@ -145,6 +145,7 @@ def render_clouds():
         pg.draw.rect(screen, colors.white,
                          [cloudx[i]-coeff_x*settings.tilesize, cloudy[i]-coeff_y*settings.tilesize, settings.cloudwidth, settings.cloudheight], 10)
         cloudx[i] += i + 1
+    render_inventory()
 
 
 def render_field():
@@ -168,6 +169,7 @@ def render_field():
 
 
 def render_inventory():
+    pg.draw.rect(screen, colors.gray, [0, settings.maxfity*settings.tilesize, ])
     x_pos = 70 + settings.tilesize
     pg.draw.polygon(screen, colors.yellow,
                     [(x_pos + settings.tilesize // 3, settings.maxfity * settings.tilesize + settings.tilesize),
@@ -189,14 +191,13 @@ def render_inventory():
             text = font.render(str(inventory[resources[i]]), False, colors.black, colors.white)
             screen.blit(text,
                         [x_pos, settings.maxfity * settings.tilesize + settings.tilesize + settings.tilesize // 3])
-    render_clouds()
 
 
 def render_player():
     pg.draw.rect(screen, colors.custom[1],
                  [settings.tilesize * 4 + settings.playersize, settings.tilesize * 2 + settings.playersize,
                   settings.tilesize - settings.playersize * 2, settings.tilesize - settings.playersize * 2])
-    render_inventory()
+    render_clouds()
 
 
 def save_world():

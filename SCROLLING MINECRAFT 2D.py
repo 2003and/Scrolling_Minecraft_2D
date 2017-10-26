@@ -143,7 +143,8 @@ def render_clouds():
             cloudx[i] = settings.cloudwidth * -1
             cloudy[i] = random.randint(0, settings.mapheight * settings.tilesize)
         pg.draw.rect(screen, colors.white,
-                         [cloudx[i]-coeff_x*settings.tilesize, cloudy[i]-coeff_y*settings.tilesize, settings.cloudwidth, settings.cloudheight], 10)
+                     [cloudx[i] - coeff_x * settings.tilesize, cloudy[i] - coeff_y * settings.tilesize,
+                      settings.cloudwidth, settings.cloudheight], 10)
         cloudx[i] += i + 1
     render_inventory()
 
@@ -169,7 +170,8 @@ def render_field():
 
 
 def render_inventory():
-    pg.draw.rect(screen, colors.gray, [0, settings.maxfity*settings.tilesize, ])
+    pg.draw.rect(screen, colors.gray,
+                 [0, settings.maxfity * settings.tilesize, settings.maxfitx * settings.tilesize, 3 * settings.tilesize])
     x_pos = 70 + settings.tilesize
     pg.draw.polygon(screen, colors.yellow,
                     [(x_pos + settings.tilesize // 3, settings.maxfity * settings.tilesize + settings.tilesize),

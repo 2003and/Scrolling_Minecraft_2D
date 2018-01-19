@@ -27,13 +27,15 @@ LAPIS = 17
 RUBY = 18
 EMERALD = 19
 AMETHYST = 20
+GLASS = 21
 
 settings = Settings('minecraft')
 resources = [DIRT, GRASS, WATER, COAL, DIAMOND, ROCK, STONE, GOLD, WOOD, BRICK, WOOL, PINK_WOOL, BLUE_WOOL, GREEN_WOOL,
-             LIME_WOOL, YELLOW_WOOL, LAPIS, RUBY, EMERALD, AMETHYST]
+             LIME_WOOL, YELLOW_WOOL, LAPIS, RUBY, EMERALD, AMETHYST, GLASS]
 renderables = [DIRT, GRASS, WATER, COAL, ROCK, WOOD]
 colors.new_color(75, 75, 75)
 colors.new_color(225, 175, 135)
+colors.new_color(110, 110, 255)
 colormap = {
     BEDROCK: colors.custom[0],
     DIRT: colors.brown,
@@ -56,6 +58,7 @@ colormap = {
     RUBY: colors.dark_red,
     EMERALD: colors.dark_green,
     AMETHYST: colors.magenta,
+    GLASS: colors.custom[2]
 }
 inventory = {
     DIRT: 0,
@@ -77,7 +80,8 @@ inventory = {
     LAPIS: 0,
     RUBY: 0,
     EMERALD: 0,
-    AMETHYST: 0
+    AMETHYST: 0,
+    GLASS: 0
 }
 craft = {
     DIRT: {DIRT: 0},
@@ -99,7 +103,8 @@ craft = {
     LAPIS: {WATER: 1, COAL: 1},
     RUBY: {DIAMOND: 1, GOLD: 1, LAPIS: 1},
     EMERALD: {DIAMOND: 2, GRASS: 4},
-    AMETHYST: {DIAMOND: 1, GRASS: 2}
+    AMETHYST: {DIAMOND: 1, GRASS: 2},
+    GLASS: {ROCK: 1, DIRT: 2}
 }
 barrier_colors = (colors.light_blue, colors.blue, colors.dark_blue, colors.black)
 barrier_color = 0
@@ -125,9 +130,13 @@ def render_entities():
                                   settings.tilesize * (r - coeff_y) + settings.playersize // 2,
                                   settings.tilesize - settings.playersize,
                                   settings.tilesize - settings.playersize])
+                    if entity_field[r][c] == GLASS:
+                        pg.draw.line(screen, colors.white, [settings.tilesize * (c - coeff_x) + settings.tilesize // 4,
+                                                            settings.tilesize * (r - coeff_y) + settings.tilesize // 4],
+                                     [settings.tilesize * (c - coeff_x + 1) - settings.tilesize // 4,
+                                      settings.tilesize * (r - coeff_y + 1) - settings.tilesize // 4], 1)
     for r in range(coeff_y, coeff_y + settings.maxfity + 1):
         for c in range(coeff_x, coeff_x + settings.maxfitx + 1):
-            pass
             if 0 <= r < settings.mapheight and 0 <= c < settings.mapwidth:
                 if small_entity_field[r][c] > 0:
                     pg.draw.rect(screen, colormap[small_entity_field[r][c]],
@@ -135,6 +144,11 @@ def render_entities():
                                   settings.tilesize * (r - coeff_y) + (settings.playersize // 3 * 2) * 1.5,
                                   settings.tilesize - (settings.playersize // 3 * 2) * 3,
                                   settings.tilesize - (settings.playersize // 3 * 2) * 3])
+                    if small_entity_field[r][c] == GLASS:
+                        pg.draw.line(screen, colors.white, [settings.tilesize * (c - coeff_x) + settings.tilesize // 3,
+                                                            settings.tilesize * (r - coeff_y) + settings.tilesize // 3],
+                                     [settings.tilesize * (c - coeff_x + 1) - settings.tilesize // 3,
+                                      settings.tilesize * (r - coeff_y + 1) - settings.tilesize // 3], 1)
 
 
 def render_clouds():
@@ -144,9 +158,9 @@ def render_clouds():
             cloudy[i] = random.randint(0, settings.mapheight * settings.tilesize)
         pg.draw.rect(screen, colors.white,
                      [cloudx[i] - coeff_x * settings.tilesize, cloudy[i] - coeff_y * settings.tilesize,
-                      settings.cloudwidth, settings.cloudheight], 10)
+                      settings.cloudwidth * settings.tilesize // 25, settings.cloudheight * settings.tilesize // 20],
+                     10)
         cloudx[i] += i + 1
-    render_inventory()
 
 
 def render_field():
@@ -165,6 +179,11 @@ def render_field():
                 pg.draw.rect(screen, colormap[field[r][c]],
                              [settings.tilesize * (c - coeff_x), settings.tilesize * (r - coeff_y),
                               settings.tilesize, settings.tilesize])
+                if field[r][c] == GLASS:
+                    pg.draw.line(screen, colors.white, [settings.tilesize * (c - coeff_x) + settings.tilesize // 5,
+                                                        settings.tilesize * (r - coeff_y) + settings.tilesize // 5],
+                                 [settings.tilesize * (c - coeff_x + 1) - settings.tilesize // 5,
+                                  settings.tilesize * (r - coeff_y + 1) - settings.tilesize // 5], 1)
     render_entities()
     render_player()
 
@@ -172,7 +191,7 @@ def render_field():
 def render_inventory():
     pg.draw.rect(screen, colors.gray,
                  [0, settings.maxfity * settings.tilesize, settings.maxfitx * settings.tilesize, 3 * settings.tilesize])
-    x_pos = 70 + settings.tilesize
+    x_pos = settings.tilesize * 2 + settings.tilesize // 5
     pg.draw.polygon(screen, colors.yellow,
                     [(x_pos + settings.tilesize // 3, settings.maxfity * settings.tilesize + settings.tilesize),
                      (x_pos + (settings.tilesize // 3) * 2,
@@ -180,7 +199,7 @@ def render_inventory():
                      (x_pos + settings.tilesize // 2, settings.maxfity * settings.tilesize + settings.tilesize * 1.5)])
     x_pos = 0
     for i in range(selection - 1, selection + 2):
-        x_pos += 50
+        x_pos += settings.tilesize + settings.tilesize // 10
         if i == len(resources):
             pg.draw.rect(screen, colormap[resources[0]],
                          [x_pos, settings.maxfity * settings.tilesize + settings.tilesize + settings.tilesize // 2,
@@ -214,6 +233,14 @@ def save_world():
         save_file = open('inventory.txt', 'wb')
         pickle.dump(inventory, save_file)
         save_file.close()
+
+
+def render_everything():
+    render_field()
+    render_entities()
+    render_player()
+    render_clouds()
+    render_inventory()
 
 
 pg.init()
@@ -368,7 +395,7 @@ while True:
                     selection = 0
 
     # rendering stuff
-    render_field()
+    render_everything()
     pg.display.flip()
     clock.tick(20)
     barrier_color = random.choice(barrier_colors)

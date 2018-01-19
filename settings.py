@@ -8,7 +8,7 @@ class Settings:
             self.width = 175
             self.height = 275
         elif game == 'minecraft':
-            self.tilesize = 30
+            self.tilesize = 75
             self.playersize = 10
             self.mapwidth = 64
             self.mapheight = 30

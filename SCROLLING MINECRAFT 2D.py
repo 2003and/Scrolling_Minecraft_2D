@@ -28,14 +28,16 @@ RUBY = 18
 EMERALD = 19
 AMETHYST = 20
 GLASS = 21
+ICE = 22
 
 settings = Settings('minecraft')
 resources = [DIRT, GRASS, WATER, COAL, DIAMOND, ROCK, STONE, GOLD, WOOD, BRICK, WOOL, PINK_WOOL, BLUE_WOOL, GREEN_WOOL,
-             LIME_WOOL, YELLOW_WOOL, LAPIS, RUBY, EMERALD, AMETHYST, GLASS]
+             LIME_WOOL, YELLOW_WOOL, LAPIS, RUBY, EMERALD, AMETHYST, GLASS, ICE]
 renderables = [DIRT, GRASS, WATER, COAL, ROCK, WOOD]
 colors.new_color(75, 75, 75)
 colors.new_color(225, 175, 135)
 colors.new_color(110, 110, 255)
+colors.new_color(220, 220, 255)
 colormap = {
     BEDROCK: colors.custom[0],
     DIRT: colors.brown,
@@ -58,7 +60,8 @@ colormap = {
     RUBY: colors.dark_red,
     EMERALD: colors.dark_green,
     AMETHYST: colors.magenta,
-    GLASS: colors.custom[2]
+    GLASS: colors.custom[2],
+    ICE: colors.custom[3]
 }
 inventory = {
     DIRT: 0,
@@ -81,7 +84,8 @@ inventory = {
     RUBY: 0,
     EMERALD: 0,
     AMETHYST: 0,
-    GLASS: 0
+    GLASS: 0,
+    ICE: 0
 }
 craft = {
     DIRT: {DIRT: 0},
@@ -104,11 +108,13 @@ craft = {
     RUBY: {DIAMOND: 1, GOLD: 1, LAPIS: 1},
     EMERALD: {DIAMOND: 2, GRASS: 4},
     AMETHYST: {DIAMOND: 1, GRASS: 2},
-    GLASS: {ROCK: 1, DIRT: 2}
+    GLASS: {ROCK: 1, DIRT: 2},
+    ICE: {ICE: 1}
 }
 barrier_colors = (colors.light_blue, colors.blue, colors.dark_blue, colors.black)
 barrier_color = 0
 selection = 0
+direction = ''
 field = [[random.choice(renderables) for i in range(settings.mapwidth)] for j in range(settings.mapheight)]
 entity_field = [[0 for i in range(settings.mapwidth)] for j in range(settings.mapheight)]
 small_entity_field = [[0 for i in range(settings.mapwidth)] for j in range(settings.mapheight)]
@@ -135,6 +141,17 @@ def render_entities():
                                                             settings.tilesize * (r - coeff_y) + settings.tilesize // 4],
                                      [settings.tilesize * (c - coeff_x + 1) - settings.tilesize // 4,
                                       settings.tilesize * (r - coeff_y + 1) - settings.tilesize // 4], 1)
+                    if entity_field[r][c] == ICE:
+                        pg.draw.line(screen, colors.very_light_blue,
+                                     [settings.tilesize * (c - coeff_x) + settings.tilesize // 4,
+                                      settings.tilesize * (r - coeff_y) + settings.tilesize // 4],
+                                     [settings.tilesize * (c - coeff_x + 1) - settings.tilesize // 4,
+                                      settings.tilesize * (r - coeff_y + 1) - settings.tilesize // 4], 5)
+                        pg.draw.line(screen, colors.custom[3],
+                                     [settings.tilesize * (c - coeff_x) + settings.tilesize // 5,
+                                      settings.tilesize * (r - coeff_y) + settings.tilesize // 5],
+                                     [settings.tilesize * (c - coeff_x + 1) - settings.tilesize // 5,
+                                      settings.tilesize * (r - coeff_y + 1) - settings.tilesize // 5], 3)
     for r in range(coeff_y, coeff_y + settings.maxfity + 1):
         for c in range(coeff_x, coeff_x + settings.maxfitx + 1):
             if 0 <= r < settings.mapheight and 0 <= c < settings.mapwidth:
@@ -149,6 +166,17 @@ def render_entities():
                                                             settings.tilesize * (r - coeff_y) + settings.tilesize // 3],
                                      [settings.tilesize * (c - coeff_x + 1) - settings.tilesize // 3,
                                       settings.tilesize * (r - coeff_y + 1) - settings.tilesize // 3], 1)
+                    if small_entity_field[r][c] == ICE:
+                        pg.draw.line(screen, colors.very_light_blue,
+                                     [settings.tilesize * (c - coeff_x) + settings.tilesize // 3,
+                                      settings.tilesize * (r - coeff_y) + settings.tilesize // 3],
+                                     [settings.tilesize * (c - coeff_x + 1) - settings.tilesize // 3,
+                                      settings.tilesize * (r - coeff_y + 1) - settings.tilesize // 3], 5)
+                        pg.draw.line(screen, colors.custom[3],
+                                     [settings.tilesize * (c - coeff_x) + settings.tilesize // 3,
+                                      settings.tilesize * (r - coeff_y) + settings.tilesize // 3],
+                                     [settings.tilesize * (c - coeff_x + 1) - settings.tilesize // 3,
+                                      settings.tilesize * (r - coeff_y + 1) - settings.tilesize // 3], 3)
 
 
 def render_clouds():
@@ -184,6 +212,17 @@ def render_field():
                                                         settings.tilesize * (r - coeff_y) + settings.tilesize // 5],
                                  [settings.tilesize * (c - coeff_x + 1) - settings.tilesize // 5,
                                   settings.tilesize * (r - coeff_y + 1) - settings.tilesize // 5], 1)
+                if field[r][c] == ICE:
+                    pg.draw.line(screen, colors.very_light_blue,
+                                 [settings.tilesize * (c - coeff_x) + settings.tilesize // 5,
+                                  settings.tilesize * (r - coeff_y) + settings.tilesize // 5],
+                                 [settings.tilesize * (c - coeff_x + 1) - settings.tilesize // 5,
+                                  settings.tilesize * (r - coeff_y + 1) - settings.tilesize // 5], 5)
+                    pg.draw.line(screen, colors.custom[3],
+                                 [settings.tilesize * (c - coeff_x) + settings.tilesize // 5,
+                                  settings.tilesize * (r - coeff_y) + settings.tilesize // 5],
+                                 [settings.tilesize * (c - coeff_x + 1) - settings.tilesize // 5,
+                                  settings.tilesize * (r - coeff_y + 1) - settings.tilesize // 5], 3)
     render_entities()
     render_player()
 
@@ -245,8 +284,7 @@ def render_everything():
 
 pg.init()
 clock = pg.time.Clock()
-screen = pg.display.set_mode(
-    [200, 150])
+screen = pg.display.set_mode([200, 150])
 cloudx = []
 cloudy = []
 for i in range(settings.cloudnum):
@@ -285,15 +323,19 @@ while True:
             if event.key == pg.K_UP:
                 if not coeff_y == -2:
                     coeff_y -= 1
+                direction = 'u'
             elif event.key == pg.K_DOWN:
                 if not coeff_y == settings.mapheight - 3:
                     coeff_y += 1
+                direction = 'd'
             elif event.key == pg.K_LEFT:
                 if not coeff_x == -4:
                     coeff_x -= 1
+                direction = 'l'
             elif event.key == pg.K_RIGHT:
                 if not coeff_x == settings.mapwidth - 5:
                     coeff_x += 1
+                direction = 'r'
 
             # interaction with blocks
             elif event.key == pg.K_SPACE:

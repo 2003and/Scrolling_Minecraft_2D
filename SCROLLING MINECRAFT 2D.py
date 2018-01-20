@@ -109,7 +109,7 @@ craft = {
     EMERALD: {DIAMOND: 2, GRASS: 4},
     AMETHYST: {DIAMOND: 1, GRASS: 2},
     GLASS: {ROCK: 1, DIRT: 2},
-    ICE: {ICE: 1}
+    ICE: {WATER: 1, ROCK: 1}
 }
 barrier_colors = (colors.light_blue, colors.blue, colors.dark_blue, colors.black)
 barrier_color = 0
@@ -247,6 +247,29 @@ def render_inventory():
             pg.draw.rect(screen, colormap[resources[i]],
                          [x_pos, settings.maxfity * settings.tilesize + settings.tilesize + settings.tilesize // 2,
                           settings.tilesize, settings.tilesize])
+            if resources[i] == ICE:
+                pg.draw.line(screen, colors.very_light_blue,
+                             [x_pos + settings.tilesize // 5,
+                              settings.maxfity * settings.tilesize + settings.tilesize + settings.tilesize // 2 +
+                              settings.tilesize // 5],
+                             [x_pos + settings.tilesize - settings.tilesize // 5,
+                              settings.maxfity * settings.tilesize + settings.tilesize + settings.tilesize // 2 +
+                              settings.tilesize - settings.tilesize // 5], 5)
+                pg.draw.line(screen, colors.custom[3],
+                             [x_pos + settings.tilesize // 5,
+                              settings.maxfity * settings.tilesize + settings.tilesize
+                              + settings.tilesize // 2 + settings.tilesize // 5],
+                             [x_pos + settings.tilesize - settings.tilesize // 5,
+                              settings.maxfity * settings.tilesize + settings.tilesize + settings.tilesize // 2 +
+                              settings.tilesize - settings.tilesize // 5], 3)
+
+            if resources[i] == GLASS:
+                pg.draw.line(screen, colors.white, [x_pos + settings.tilesize // 5,
+                                                    settings.maxfity * settings.tilesize + settings.tilesize
+                                                    + settings.tilesize // 2 + settings.tilesize // 5],
+                             [x_pos + settings.tilesize - settings.tilesize // 5,
+                              settings.maxfity * settings.tilesize + settings.tilesize + settings.tilesize // 2 +
+                              settings.tilesize - settings.tilesize // 5], 1)
         if mode == 's':
             text = font.render(str(inventory[resources[i]]), False, colors.black, colors.white)
             screen.blit(text,

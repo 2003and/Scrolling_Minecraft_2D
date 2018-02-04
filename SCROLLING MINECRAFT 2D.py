@@ -29,11 +29,37 @@ EMERALD = 19
 AMETHYST = 20
 GLASS = 21
 ICE = 22
+MOVER = 23
 
 settings = Settings('minecraft')
 resources = [DIRT, GRASS, WATER, COAL, DIAMOND, ROCK, STONE, GOLD, WOOD, BRICK, WOOL, PINK_WOOL, BLUE_WOOL, GREEN_WOOL,
-             LIME_WOOL, YELLOW_WOOL, LAPIS, RUBY, EMERALD, AMETHYST, GLASS, ICE]
+             LIME_WOOL, YELLOW_WOOL, LAPIS, RUBY, EMERALD, AMETHYST, GLASS, ICE, MOVER]
 renderables = [DIRT, GRASS, WATER, COAL, ROCK, WOOD]
+names = {BEDROCK: 'bedrock',
+         DIRT: 'dirt',
+         GRASS: 'grass',
+         WATER: 'water',
+         COAL: 'coal',
+         DIAMOND: 'diamond',
+         ROCK: 'cobblestone',
+         STONE: 'stone',
+         GOLD: 'gold',
+         WOOD: 'wood',
+         BRICK: 'bricks',
+         WOOL: 'wool',
+         PINK_WOOL: 'wool(pink)',
+         BLUE_WOOL: 'wool(blue)',
+         GREEN_WOOL: 'wool(green)',
+         LIME_WOOL: 'wool(lime)',
+         YELLOW_WOOL: 'wool(yellow)',
+         LAPIS: 'lapis',
+         RUBY: 'ruby',
+         EMERALD: 'emerald',
+         AMETHYST: 'amethyst',
+         GLASS: 'glass',
+         ICE: 'ice',
+         MOVER: 'mover'
+         }
 colors.new_color(75, 75, 75)
 colors.new_color(225, 175, 135)
 colors.new_color(110, 110, 255)
@@ -61,7 +87,8 @@ colormap = {
     EMERALD: colors.dark_green,
     AMETHYST: colors.magenta,
     GLASS: colors.custom[2],
-    ICE: colors.custom[3]
+    ICE: colors.custom[3],
+    MOVER: colors.dark_blue
 }
 inventory = {
     DIRT: 0,
@@ -85,7 +112,8 @@ inventory = {
     EMERALD: 0,
     AMETHYST: 0,
     GLASS: 0,
-    ICE: 0
+    ICE: 0,
+    MOVER: 0
 }
 craft = {
     DIRT: {DIRT: 0},
@@ -109,7 +137,8 @@ craft = {
     EMERALD: {DIAMOND: 2, GRASS: 4},
     AMETHYST: {DIAMOND: 1, GRASS: 2},
     GLASS: {ROCK: 1, DIRT: 2},
-    ICE: {WATER: 1, ROCK: 1}
+    ICE: {WATER: 1, ROCK: 1},
+    MOVER: {STONE: 2, EMERALD: 1, LAPIS: 1}
 }
 barrier_colors = (colors.light_blue, colors.blue, colors.dark_blue, colors.black)
 barrier_color = 0
@@ -223,8 +252,33 @@ def render_field():
                                   settings.tilesize * (r - coeff_y) + settings.tilesize // 5],
                                  [settings.tilesize * (c - coeff_x + 1) - settings.tilesize // 5,
                                   settings.tilesize * (r - coeff_y + 1) - settings.tilesize // 5], 3)
-    render_entities()
-    render_player()
+
+
+def check_for_stuff():
+    global coeff_x
+    global coeff_y
+    if field[coeff_y + 2][coeff_x + 4] == MOVER:
+        while not field[coeff_y + 2][coeff_x + 4] == MOVER:  # TODO: move if mover
+            if direction == 'r':
+                coeff_x += 1
+            if direction == 'l':
+                coeff_x -= 1
+            if direction == 'u':
+                coeff_y -= 1
+            if direction == 'd':
+                coeff_y += 1
+            if coeff_x < -4:
+                coeff_x = -4
+                break
+            if coeff_x > len(field[0]) - 4:
+                coeff_x = len(field[0]) - 4
+                break
+            if coeff_y < -2:
+                coeff_y = -2
+                break
+            if coeff_y > len(field) - 2:
+                coeff_y = len(field) - 2
+                break
 
 
 def render_inventory():
@@ -389,7 +443,7 @@ while True:
                     field[coeff_y + 2][coeff_x + 4] = resources[selection]
 
             # crafting
-            elif event.key == pg.K_2 and mode == 's':
+            elif event.key == pg.K_4 and mode == 's':
                 canBeMade = True
                 for i in craft[selection + 1]:
                     if inventory[i] < craft[selection + 1][i]:
@@ -401,7 +455,7 @@ while True:
                         inventory[i] -= craft[selection + 1][i]
                     inventory[selection + 1] += 1
             # entities placement
-            elif event.key == pg.K_3:
+            elif event.key == pg.K_2:
                 current_entity = entity_field[coeff_y + 2][coeff_x + 4]
                 if mode == 's':
                     if inventory[resources[selection]] > 0:
@@ -411,7 +465,7 @@ while True:
                         inventory[resources[selection]] -= 1
                 else:
                     entity_field[coeff_y + 2][coeff_x + 4] = resources[selection]
-            elif event.key == pg.K_4:
+            elif event.key == pg.K_3:
                 current_entity = small_entity_field[coeff_y + 2][coeff_x + 4]
                 if mode == 's':
                     if inventory[resources[selection]] > 0:
@@ -460,6 +514,7 @@ while True:
                     selection = 0
 
     # rendering stuff
+    check_for_stuff()
     render_everything()
     pg.display.flip()
     clock.tick(20)
